@@ -78,3 +78,56 @@ struct cmdgroup *new_group() {
 
 	return (new_grp);
 };
+
+void free_command(struct cmd *c) {
+	free(path);
+	path = NULL;
+
+	while (!STAILQ_EMPTY(&c->argv)) {
+		struct argentry *a = STAILQ_FIRST(&c->argv);
+		STAILQ_REMOVE_HEAD(&c->argv, entries);
+		
+		free(a->text);
+		free(a);
+
+		c->argc--;
+	}
+
+	free(inpath);
+	inpath = NULL;
+
+	free(outpath);
+	outpath = NULL;
+
+	isappend = false;
+	argc = 0;
+	// free(c);
+};
+
+void free_pipe(struct cmdpipe *cp) {
+	while (!STAILQ_EMPTY(&cp->commands)) {
+		struct cmdentry comm = STAILQ_FIRST(&cp->commands);
+		STAILQ_REMOVE_HEAD(&cp->commands, entries);
+
+		free_command(comm->command);
+		free(comm);
+
+		cp->cmdc--;
+	}
+
+	// free(cp);
+};
+
+void free_group(struct cmdgroup *cg) {
+	while (!STAILQ_EMPTY(&cg->pipes)) {
+		struct pipeentry *p = STAILQ_FIRST(&cg->pipes);
+		STAILQ_REMOVE_HEAD(&cp->pipes, entries);
+
+		free_pipe(p->p);
+		free(p);
+
+		cg->pipec--;
+	}
+
+	// free(cg);
+};

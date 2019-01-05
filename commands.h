@@ -57,5 +57,7 @@ struct cmd *new_command();
 struct cmdpipe *new_pipeline();
 struct cmdgroup *new_group();
 
+void free_command(struct cmd *c);
+void free_pipe(struct cmdpipe *cp);
 void free_group(struct cmdgroup *cg);
 #endif // _COMMANDS_H_
