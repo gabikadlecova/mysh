@@ -37,7 +37,7 @@ STAILQ_HEAD(grouphead, pipeentry);
 
 struct pipeentry {
 	STAILQ_ENTRY(pipeentry) entries;
-	struct cmdpipe *subcommand;
+	struct cmdpipe *p;
 };
 
 struct cmdgroup {
@@ -51,7 +51,7 @@ void add_out(struct cmd *c, const char *outtext, bool isappend);
 
 void push_command(struct cmdpipe *cp, struct cmd *command);
 
-void push_pipe(struct cmdgroup *cg, struct cmdpipe cp);
+void push_pipe(struct cmdgroup *cg, struct cmdpipe *cp);
 
 struct cmd *new_command();
 struct cmdpipe *new_pipeline();

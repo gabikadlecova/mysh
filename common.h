@@ -4,14 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define	CREATE_DYN(TYPE) ( \
-	TYPE *ptr; \
-	if ((ptr = (TYPE *) malloc(sizeof (TYPE))) == NULL) { \
-		fprintf(stderr, "malloc failed (%s)\n", strerror(errno)); \
-		exit(1); \
-	} \
-)
-
 #define	ERR_CHECK(cond, err_no, ret_val) ( \
 	if (cond) { \
 		errno = err_no; \
@@ -23,6 +15,11 @@
 	if (cond) { \
 		err(exit_val, err_text) \
 	} \
+)
+
+#define	TRY_MALLOC(type, var_name) ( \
+	type *var_name = (type *) malloc(sizeof (type)); \
+	ERR_EXIT(var_name == NULL, EXIT_FAILURE, "malloc failed"); \
 )
 
 #endif // _COMMON_H_
