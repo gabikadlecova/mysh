@@ -1,9 +1,10 @@
 CC=cc
 DEPS = *.h
-OBJ = commands.o execcmd.o
+OBJ = commands.o execcmd.o main.o
+CFLAGS = -g
 
 mysh: bison flex mysh.l mysh.y $(OBJ)
-	$(CC) -o $@ $(OBJ) mysh.tab.c lex.yy.c
+	$(CC) $(CFLAGS) -o $@ $(OBJ) mysh.tab.c lex.yy.c -lreadline
 
 bison:
 	bison -d mysh.y
@@ -12,7 +13,7 @@ flex:
 	flex mysh.l
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< 
+	$(CC) $(CFLAGS) -c -o $@ $< 
 
 clean:
 	rm lex.yy.c mysh.tab.c mysh $(OBJ)

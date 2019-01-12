@@ -31,6 +31,7 @@ extern int yylineno;
 
 %define parse.error verbose
 
+%destructor { free_group($$); } grp
 
 %%
 

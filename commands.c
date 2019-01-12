@@ -105,7 +105,7 @@ void free_command(struct cmd *c) {
 
 		c->argc--;
 	}
-
+	
 	free(c->inpath);
 	c->inpath = NULL;
 
@@ -114,7 +114,8 @@ void free_command(struct cmd *c) {
 
 	c->isappend = false;
 	c->argc = 0;
-	// free(c);
+	
+	free(c);
 };
 
 void free_pipe(struct cmdpipe *cp) {
@@ -124,11 +125,11 @@ void free_pipe(struct cmdpipe *cp) {
 
 		free_command(comm->command);
 		free(comm);
-
+		
 		cp->cmdc--;
 	}
 
-	// free(cp);
+	free(cp);
 };
 
 void free_group(struct cmdgrp *cg) {
@@ -142,5 +143,5 @@ void free_group(struct cmdgrp *cg) {
 		cg->pipec--;
 	}
 
-	// free(cg);
+	free(cg);
 };

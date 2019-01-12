@@ -6,6 +6,8 @@
 #include "common.h"
 #include "commands.h"
 
+#include <errno.h>
+
 pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe);
 pid_t exec_pipe(struct cmdpipe *cp);
 
@@ -18,15 +20,17 @@ int exec_group(struct cmdgrp *cg) {
 	}
 
 	// todo improve
-	pid_t a = wait(NULL);
-	// while (wait(result) != -1);
+	while (wait(NULL) != -1);
+
+	
 	return (result);
 };
 
 int exec_pipe(struct cmdpipe *cp) {
 	pid_t last_pid;
 	
-	int *prev_fd = NULL;
+	int prev_out = -1;
+	int fd[2];
 	int ind = 0;
 
 	struct cmdentry *c;
@@ -34,25 +38,19 @@ int exec_pipe(struct cmdpipe *cp) {
 		int infd = -1;
 		int outfd = -1;
 
-		if (prev_fd != NULL) {
-			infd = prev_fd[1];
-		}
+		infd = prev_out;
 		
 		if (ind != (cp->cmdc - 1)) {
-			int *fd = malloc(sizeof(int) * 2);
-			pipe(fd);
-			//todo handle errors
+			int piperes = pipe(fd);
 
-			outfd = fd[0];
-
-			free(prev_fd);
-			prev_fd = fd;
+			//todo closes??
+			outfd = fd[1];
+			prev_out = fd[0];
 		}
 	
 		last_pid = exec_cmd(c->command, infd, outfd);
+		ind++; // error-safe?
 	}
-
-	free(prev_fd);
 
 	return (last_pid);
 };
@@ -88,10 +86,12 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 
 		char **args = args_to_list(c);
 			
-		int a = execvp(c->path, args);
+		execvp(c->path, args);
 	}
 	
-	// todo possible frees?
+	close(inpipe);
+	close(outpipe);
+	// todo possible frees? and closes
 	return (pid);
 };
 
