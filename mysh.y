@@ -1,19 +1,23 @@
 %{
 # include "commands.h"
 # include "execcmd.h"
+# include <stdio.h>
+# include <stdlib.h>
+
+# include <string.h>
 
 extern int yylineno;
 
 %}
 
 %union {
-	char *arg;
+	char *str;
 	struct cmd *command;
-	struct cmdgroup *group;
+	struct cmdgrp *group;
 	struct cmdpipe *pipeline;
 }
 
-%token <arg> TEXT
+%token <str> TEXT
 %token NL
 %token SEMICOLON
 %token PIPE
@@ -33,17 +37,17 @@ extern int yylineno;
 cmdline
    :
    | cmdline NL
-   | cmdline grp NL { exec_group($2); free_group($2); }
+   | cmdline grp NL { printf("1"); exec_group($2); free_group($2); }
    ;
 
 grp
-  : pipeln { $$ = new_group(); push_pipe($$, $1); }
+  : pipeln { printf("2"); $$ = new_group(); push_pipe($$, $1); }
   | pipeln SEMICOLON { $$ = new_group(); push_pipe($$, $1); }
   | pipeln SEMICOLON grp { $$ = $3; push_pipe($$, $1); }
   ;
 
 pipeln
-  : com { $$ = new_pipeline(); push_command($$, $1); }
+  : com { printf("3"); $$ = new_pipeline(); push_command($$, $1); }
   | com PIPE pipeln { $$ = $3; push_command($$, $1); }
   ;
 
@@ -55,8 +59,13 @@ com
   ;
 
 comtokens
-  : TEXT { $$ = new_command(); $$->path = $1;  }
-  | comtokens TEXT { $$ = $1; add_arg($$, $2); }
+  : TEXT { printf("4 value: %s", $1); $$ = new_command(); $$->path = strdup($1);  }
+  | comtokens TEXT { printf("5 value: %s", $1); $$ = $1; add_arg($$, strdup($2)); }
   ;
 
 %%
+
+int yyerror(char *s) {
+	fprintf(stderr, "error: %s\n", s);
+};
+

@@ -3,6 +3,6 @@
 
 #include "commands.h"
 
-int exec_group(struct cmdgroup *cg);
+int exec_group(struct cmdgrp *cg);
 
 #endif // _EXECCMD_H_

@@ -1,6 +1,12 @@
 # cstyle check
 cstyle.pl
 
+# bison and flex
+*.tab.h
+*.tab.c
+lex.yy.c
+
+
 # Prerequisites
 *.d
 
