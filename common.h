@@ -4,18 +4,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <err.h>
+#include <errno.h>
 
-#define	ERR_CHECK(cond, err_no, ret_val) \
+#define	ERR_RETURN(cond, ret_val) \
 	if (cond) { \
-		errno = err_no; \
 		return (ret_val); \
 	} \
 
-#define	ERR_EXIT(cond, exit_val, err_text) \
+#define	ERR_ERRNO_RETURN(cond, exit_val, ret_val) \
 	if (cond) { \
-		err(exit_val, err_text); \
+		errno = exit_val; \
+		return (ret_val); \
 	} \
 
-#define MALLOC_FAILED "malloc failed"
+#define	ERR_EXIT(cond) \
+	if (cond) { \
+		err(EXIT_FAILURE, strerror(errno)); \
+	} \
 
 #endif // _COMMON_H_

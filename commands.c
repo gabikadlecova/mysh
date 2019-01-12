@@ -4,13 +4,15 @@
 
 void add_path(struct cmd *c, const char *path) {
 	c->path = strdup(path);
+	ERR_EXIT(c->path == NULL);
 };
 
 void add_arg(struct cmd *c, const char *argtext) {
 	struct argentry * arg = (struct argentry *) malloc(sizeof(struct argentry));
-	ERR_EXIT(arg == NULL, EXIT_FAILURE, MALLOC_FAILED);
+	ERR_EXIT(arg == NULL);
 
-	arg->text = strdup(argtext); // argtext could be freed elsewhere
+	arg->text = strdup(argtext);
+	ERR_EXIT(arg->text == NULL);
 
 	if (STAILQ_EMPTY(&c->argv)) {
 		STAILQ_INSERT_HEAD(&c->argv, arg, entries);
@@ -24,12 +26,12 @@ void add_arg(struct cmd *c, const char *argtext) {
 
 void add_in(struct cmd *c, const char *intext) {
 	c->inpath = strdup(intext);
-	ERR_EXIT(c->inpath == NULL, EXIT_FAILURE, NULL);
+	ERR_EXIT(c->inpath == NULL);
 };
 
 void add_out(struct cmd *c, const char *outtext, bool isappend) {
 	c->outpath = strdup(outtext);
-	ERR_EXIT(c->outpath == NULL, EXIT_FAILURE, NULL);
+	ERR_EXIT(c->outpath == NULL);
 
 	c->isappend = isappend;
 };
@@ -37,7 +39,7 @@ void add_out(struct cmd *c, const char *outtext, bool isappend) {
 
 void push_command(struct cmdpipe *cp, struct cmd *command) {
 	struct cmdentry *new_cmd = (struct cmdentry *) malloc(sizeof(struct cmdentry));
-	ERR_EXIT(new_cmd == NULL, EXIT_FAILURE, MALLOC_FAILED);
+	ERR_EXIT(new_cmd == NULL);
 
 	new_cmd->command = command;
 	
@@ -48,7 +50,7 @@ void push_command(struct cmdpipe *cp, struct cmd *command) {
 
 void push_pipe(struct cmdgrp *cg, struct cmdpipe *cp) {
 	struct pipeentry *new_pipe = (struct pipeentry *) malloc(sizeof(struct pipeentry));
-	ERR_EXIT(new_pipe == NULL, EXIT_FAILURE, MALLOC_FAILED);
+	ERR_EXIT(new_pipe == NULL);
 	
 	new_pipe->p = cp;
 
@@ -59,7 +61,7 @@ void push_pipe(struct cmdgrp *cg, struct cmdpipe *cp) {
 
 struct cmd *new_command() {
 	struct cmd *new_cmd = (struct cmd *) malloc(sizeof(struct cmd));
-	ERR_EXIT(new_cmd == NULL, EXIT_FAILURE, MALLOC_FAILED);
+	ERR_EXIT(new_cmd == NULL);
 
 	new_cmd->path = NULL;
 	
@@ -74,7 +76,7 @@ struct cmd *new_command() {
 
 struct cmdpipe *new_pipeline() {
 	struct cmdpipe *new_pipe = (struct cmdpipe *) malloc(sizeof(struct cmdpipe));
-	ERR_EXIT(new_pipe == NULL, EXIT_FAILURE, MALLOC_FAILED);
+	ERR_EXIT(new_pipe == NULL);
 
 	STAILQ_INIT(&new_pipe->commands);
 	new_pipe->cmdc = 0;
@@ -84,7 +86,7 @@ struct cmdpipe *new_pipeline() {
 
 struct cmdgrp *new_group() {
 	struct cmdgrp *new_grp = (struct cmdgrp*) malloc(sizeof(struct cmdgrp));
-	ERR_EXIT(new_grp == NULL, EXIT_FAILURE, MALLOC_FAILED);
+	ERR_EXIT(new_grp == NULL);
 
 	STAILQ_INIT(&new_grp->subcmds);
 	new_grp->pipec = 0;

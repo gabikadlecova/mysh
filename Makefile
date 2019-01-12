@@ -16,5 +16,5 @@ flex:
 	$(CC) $(CFLAGS) -c -o $@ $< 
 
 clean:
-	rm lex.yy.c mysh.tab.c mysh $(OBJ)
+	rm lex.yy.c mysh.tab.h mysh.tab.c myshlex.h mysh $(OBJ)
 

@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/queue.h>
 #include "execcmd.h"
@@ -14,12 +15,16 @@ pid_t exec_pipe(struct cmdpipe *cp);
 int exec_group(struct cmdgrp *cg) {
 	int result = 0;
 
+	pid_t last_pid = -1;
+
 	struct pipeentry *p;
 	STAILQ_FOREACH(p, &cg->subcmds, entries) {
-		exec_pipe(p->p);
+		last_pid = exec_pipe(p->p);
 	}
 
-	// todo improve
+	// todo improve, options, retvalue
+	waitpid(last_pid, &result, 0);
+
 	while (wait(NULL) != -1);
 
 	
@@ -42,8 +47,9 @@ int exec_pipe(struct cmdpipe *cp) {
 		
 		if (ind != (cp->cmdc - 1)) {
 			int piperes = pipe(fd);
+			// todo handle
 
-			//todo closes??
+			// todo closes??
 			outfd = fd[1];
 			prev_out = fd[0];
 		}
@@ -59,14 +65,14 @@ char **args_to_list(struct cmd *c);
 
 pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 	pid_t pid = fork();
-	// printf("PID: %d\n", pid);
-	ERR_EXIT(pid == -1, EXIT_FAILURE, "cannot fork");
+	ERR_EXIT(pid == -1);
 	// todo handle better fork errno
 
 	if (pid == 0) {
 		// child
 		if (inpipe != -1) {
 			dup2(inpipe, 0);
+			//todo handle both
 
 			if (inpipe != 0) {
 				close(inpipe);
@@ -75,7 +81,8 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 
 		if (outpipe != -1) {
 			dup2(outpipe, 1);
-			
+			//todo handle both
+
 			if (outpipe != 1) {
 				close(outpipe);
 			}
@@ -87,16 +94,20 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 		char **args = args_to_list(c);
 			
 		execvp(c->path, args);
+		//todo handle
 	}
 	
 	close(inpipe);
 	close(outpipe);
-	// todo possible frees? and closes
+	// todo possible frees? and closes +handle closes
 	return (pid);
 };
 
 char *get_command_name(char *path) {
-	// todo check path null
+	if (path == NULL) {
+		return (NULL);
+	}
+
 	size_t len = strlen(path);
 	size_t last_sep = len;
 
@@ -107,16 +118,14 @@ char *get_command_name(char *path) {
 	}
 
 	if (last_sep == len) {
-		return (strdup(path));
-	}
-
-	if (last_sep == (len - 1)) {
-		// todo better
-		return (NULL);
+		char *res = strdup(path);
+		ERR_EXIT(res == NULL);
+		
+		return (res);
 	}
 
 	char *res = (char *) malloc(sizeof(char) * (len - last_sep));
-	ERR_EXIT(res == NULL, EXIT_FAILURE, MALLOC_FAILED);
+	ERR_EXIT(res == NULL);
 
 	strcpy(res, &path[last_sep + 1]);
 
@@ -125,17 +134,17 @@ char *get_command_name(char *path) {
 
 char **args_to_list(struct cmd *c) {
 	char **args = (char **) malloc((c->argc + 2) * sizeof(char *));
-	ERR_EXIT(args == NULL, EXIT_FAILURE, MALLOC_FAILED);
+	ERR_EXIT(args == NULL);
 	
 	int argind = 0;
-
-	// todo check null
 	args[argind++] = get_command_name(c->path);
 	
 	struct argentry *a;
 	STAILQ_FOREACH(a, &c->argv, entries) {
-		args[argind++] = a->text;
+		char *dup = strdup(a->text);
+		ERR_EXIT(dup == NULL);
 
+		args[argind++] = dup;
 	}
 
 	args[argind] = (char *) NULL;
