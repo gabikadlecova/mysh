@@ -6,7 +6,7 @@
 
 %%
 
-[a-zA-Z0-9/_-]+ { yylval.str = yytext; printf("string: %s", yylval.str); return TEXT; } 
+[a-zA-Z0-9/_-]+ { yylval.str = yytext; return TEXT; } 
 ";"             { return SEMICOLON; }
 "|"             { return PIPE; }
 ">"             { return REDIR_R; }

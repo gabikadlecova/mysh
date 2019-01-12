@@ -37,17 +37,17 @@ extern int yylineno;
 cmdline
    :
    | cmdline NL
-   | cmdline grp NL { printf("1"); exec_group($2); free_group($2); }
+   | cmdline grp NL { exec_group($2); free_group($2); }
    ;
 
 grp
-  : pipeln { printf("2"); $$ = new_group(); push_pipe($$, $1); }
+  : pipeln { $$ = new_group(); push_pipe($$, $1); }
   | pipeln SEMICOLON { $$ = new_group(); push_pipe($$, $1); }
   | pipeln SEMICOLON grp { $$ = $3; push_pipe($$, $1); }
   ;
 
 pipeln
-  : com { printf("3"); $$ = new_pipeline(); push_command($$, $1); }
+  : com { $$ = new_pipeline(); push_command($$, $1); }
   | com PIPE pipeln { $$ = $3; push_command($$, $1); }
   ;
 
@@ -59,8 +59,8 @@ com
   ;
 
 comtokens
-  : TEXT { printf("4 value: %s", $1); $$ = new_command(); $$->path = strdup($1);  }
-  | comtokens TEXT { printf("5 value: %s", $1); $$ = $1; add_arg($$, strdup($2)); }
+  : TEXT { $$ = new_command(); add_path($$, $1);  }
+  | comtokens TEXT { $$ = $1; add_arg($$, $2); }
   ;
 
 %%

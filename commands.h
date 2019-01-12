@@ -45,6 +45,7 @@ struct cmdgrp {
 	int pipec;
 };
 
+void add_path(struct cmd *c, const char *path);
 void add_arg(struct cmd *c, const char *argtext);
 void add_in(struct cmd *c, const char *intext);
 void add_out(struct cmd *c, const char *outtext, bool isappend);

@@ -2,6 +2,10 @@
 #include "common.h"
 #include "string.h"
 
+void add_path(struct cmd *c, const char *path) {
+	c->path = strdup(path);
+};
+
 void add_arg(struct cmd *c, const char *argtext) {
 	struct argentry * arg = (struct argentry *) malloc(sizeof(struct argentry));
 	ERR_EXIT(arg == NULL, EXIT_FAILURE, MALLOC_FAILED);
