@@ -1,38 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/queue.h>
+#include <error.h>
+#include <errno.h>
 #include "execcmd.h"
 #include "common.h"
 #include "commands.h"
-
-#include <errno.h>
+#include "state.h"
 
 pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe);
-pid_t exec_pipe(struct cmdpipe *cp);
+int exec_pipe(struct cmdpipe *cp);
 
 int exec_group(struct cmdgrp *cg) {
 	int result = 0;
 
-	pid_t last_pid = -1;
-
 	struct pipeentry *p;
 	STAILQ_FOREACH(p, &cg->subcmds, entries) {
-		last_pid = exec_pipe(p->p);
+		result = exec_pipe(p->p);
+		if (result > SIG_VAL) {
+			break;
+		}
 	}
 
-	// todo improve, options, retvalue
-	waitpid(last_pid, &result, 0);
-
-	while (wait(NULL) != -1);
-
-	
+	set_retval(result);
 	return (result);
 };
 
 int exec_pipe(struct cmdpipe *cp) {
-	pid_t last_pid;
+	int result = 0;
+	int wstat;
+
+	pid_t last_pid = -1;
 	
 	int prev_out = -1;
 	int fd[2];
@@ -47,33 +49,69 @@ int exec_pipe(struct cmdpipe *cp) {
 		
 		if (ind != (cp->cmdc - 1)) {
 			int piperes = pipe(fd);
-			// todo handle
+			if (piperes == -1) {
+				err(1, "cannot create pipe: ");
+			}
 
-			// todo closes??
 			outfd = fd[1];
 			prev_out = fd[0];
 		}
 	
 		last_pid = exec_cmd(c->command, infd, outfd);
-		ind++; // error-safe?
+		ind++;
 	}
 
-	return (last_pid);
+	if (last_pid != 0) {
+		waitpid(last_pid, &wstat, 0);
+
+		if (WIFEXITED(wstat)) {
+			result = WEXITSTATUS(wstat);
+		}
+		else if (WIFSIGNALED(wstatus)) {
+			int sig = WTERMSIG(wstat);
+			fprintf(stderr, "Killed by signal %d\n", sig);
+			result = sig + SIG_VAL;
+		}
+		else if (WIFSTOPPED(wstatus)) {
+			int sig = WSTOPSIG(wstat);
+			fprintf(stderr, "Stopped by signal %d\n", WSTOPSIG(wstat));
+			result = sig + SIG_VAL;
+		}
+		else {
+			fprintf(stderr, "Child terminated with unknown status");
+		}
+
+	}
+	else {
+		result = get_retval(); // internal commands are expected to set retval
+	}
+
+	while (wait(NULL) != -1); // wait for the other pipe processes
+
+	return (result);
 };
 
 char **args_to_list(struct cmd *c);
 
 pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
+	if (is_intern_cmd(c->path)) {
+		
+		char **argv = args_to_list(c);
+		
+		run_intern_cmd(c->path, c->argc + 1, argv); 
+
+		free(argv);
+		return (0);
+	}
+
+	
 	pid_t pid = fork();
 	ERR_EXIT(pid == -1);
-	// todo handle better fork errno
-	// todo ! signal handler change
 
 	if (pid == 0) {
 		// child
 		if (inpipe != -1) {
 			dup2(inpipe, 0);
-			//todo handle both
 
 			if (inpipe != 0) {
 				close(inpipe);
@@ -82,20 +120,20 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 
 		if (outpipe != -1) {
 			dup2(outpipe, 1);
-			//todo handle both
 
 			if (outpipe != 1) {
 				close(outpipe);
 			}
 		}
 		
-		// todo error handling in pipes		
 		// todo redirections
 
 		char **args = args_to_list(c);
 			
 		execvp(c->path, args);
-		//todo handle
+		
+		err(127, c->path);
+
 	}
 
 	if (inpipe != -1) {
@@ -105,7 +143,7 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 	if (outpipe != -1) {
 		close(outpipe);
 	}
-	// todo possible frees? and closes +handle closes
+	
 	return (pid);
 };
 

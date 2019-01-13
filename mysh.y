@@ -1,10 +1,12 @@
 %{
-# include "commands.h"
-# include "execcmd.h"
 # include <stdio.h>
 # include <stdlib.h>
-
 # include <string.h>
+
+# include "myshlex.h"
+# include "commands.h"
+# include "execcmd.h"
+# include "state.h"
 
 extern int yylineno;
 
@@ -33,6 +35,11 @@ extern int yylineno;
 
 %destructor { free_group($$); } grp
 
+%{
+	int yyerror(const char *s) {
+		fprintf(stderr, "error:%d: syntax error near unexpected token '%s'\n", yylineno, yytext);
+	};
+%}
 %%
 
 cmdline
@@ -65,8 +72,4 @@ comtokens
   ;
 
 %%
-
-int yyerror(char *s) {
-	fprintf(stderr, "error: %s\n", s);
-};
 

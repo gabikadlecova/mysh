@@ -12,6 +12,7 @@
 #include "core.h"
 #include "state.h"
 #include "myshlex.h"
+#include "mysh.tab.h"
 
 int cd_internal(int argc, char **argv);
 
@@ -31,7 +32,7 @@ int init() {
 	// set_retval(0); // init success
 };
 
-int init_pwd() {
+char *get_pwd_path() {
 	char *buf = (char *) malloc(sizeof(char) * PATH_MAX);
 	ERR_EXIT(buf == NULL);
 
@@ -40,6 +41,12 @@ int init_pwd() {
 		free(buf);
 		ERR_EXIT(1);
 	};
+
+	return (res);
+};
+
+int init_pwd() {
+	char *res = get_pwd_path();
 
 	int var_res = set_var("PWD", res, true);
 	// todo errval
@@ -172,7 +179,7 @@ int cd_internal(int argc, char **argv) {
 			ERR_EXIT(dir == NULL);
 			break;
 		case 2:
-			if (argv[1] == "-") {
+			if (strcmp(argv[1], "-") == 0) {
 				dir = get_var("OLDPWD");
 			}
 			else {
@@ -198,8 +205,10 @@ int cd_internal(int argc, char **argv) {
 	char *pwd = get_var("PWD");
 	set_var("OLDPWD", pwd, true);
 	
-	set_var("PWD", dir, true);
+	char *new_pwd = get_pwd_path();	
+	set_var("PWD", new_pwd, true);
 
+	free(new_pwd);
 	free(pwd);
 	free(dir);
 
