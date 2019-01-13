@@ -61,9 +61,9 @@ pipeln
 
 com
   : comtokens
-  | com REDIR_R TEXT { $$ = $1; add_out($$, $3, false); }
-  | com REDIR_L TEXT { $$ = $1; add_in($$, $3); }
-  | com REDIR_A TEXT { $$ = $1; add_out($$, $3, true); }
+  | com REDIR_R TEXT { yyerror(NULL); return(1); $$ = $1; add_out($$, $3, false); }
+  | com REDIR_L TEXT { yyerror(NULL); return(1); $$ = $1; add_in($$, $3); }
+  | com REDIR_A TEXT { yyerror(NULL); return(1); $$ = $1; add_out($$, $3, true); }
   ;
 
 comtokens
