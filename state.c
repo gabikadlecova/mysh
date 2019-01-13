@@ -11,7 +11,7 @@
 SLIST_HEAD(intern_head, intern_cmd);
 struct intern_cmd {
 	SLIST_ENTRY(intern_cmd) entries;
-	
+
 	char *name;
 	sh_func func;
 };
@@ -20,7 +20,7 @@ struct intern_cmd {
 struct mysh_state {
 	bool pwd_set;
 	bool oldpwd_set;
-	
+
 	int retval;
 
 	struct intern_head intern_cmds;
@@ -121,7 +121,7 @@ int run_intern_cmd(char *cmd, int argc, char **argv) {
 
 		icmd = SLIST_NEXT(icmd, entries);
 	}
-	
+
 	return (-1);
 };
 
@@ -131,7 +131,7 @@ void add_intern_cmd(char *cmd, sh_func cmd_func) {
 
 	icmd->name = strdup(cmd);
 	ERR_EXIT(icmd->name == NULL);
-	
+
 	icmd->func = cmd_func;
 
 	SLIST_INSERT_HEAD(&state.intern_cmds, icmd, entries);

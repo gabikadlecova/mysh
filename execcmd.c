@@ -35,7 +35,7 @@ int exec_pipe(struct cmdpipe *cp) {
 	int wstat;
 
 	pid_t last_pid = -1;
-	
+
 	int prev_out = -1;
 	int fd[2];
 	int ind = 0;
@@ -46,7 +46,7 @@ int exec_pipe(struct cmdpipe *cp) {
 		int outfd = -1;
 
 		infd = prev_out;
-		
+
 		if (ind != (cp->cmdc - 1)) {
 			int piperes = pipe(fd);
 			if (piperes == -1) {
@@ -56,7 +56,7 @@ int exec_pipe(struct cmdpipe *cp) {
 			outfd = fd[1];
 			prev_out = fd[0];
 		}
-	
+
 		last_pid = exec_cmd(c->command, infd, outfd);
 		ind++;
 	}
@@ -95,16 +95,16 @@ char **args_to_list(struct cmd *c);
 
 pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 	if (is_intern_cmd(c->path)) {
-		
+
 		char **argv = args_to_list(c);
-		
-		run_intern_cmd(c->path, c->argc + 1, argv); 
+
+		run_intern_cmd(c->path, c->argc + 1, argv);
 
 		free(argv);
 		return (0);
 	}
 
-	
+
 	pid_t pid = fork();
 	ERR_EXIT(pid == -1);
 
@@ -125,13 +125,13 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 				close(outpipe);
 			}
 		}
-		
+
 		// todo redirections
 
 		char **args = args_to_list(c);
-			
+
 		execvp(c->path, args);
-		
+
 		err(127, c->path);
 
 	}
@@ -143,7 +143,7 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 	if (outpipe != -1) {
 		close(outpipe);
 	}
-	
+
 	return (pid);
 };
 
@@ -164,11 +164,11 @@ char *get_command_name(char *path) {
 	if (last_sep == len) {
 		char *res = strdup(path);
 		ERR_EXIT(res == NULL);
-		
+
 		return (res);
 	}
 
-	char *res = (char *) malloc(sizeof(char) * (len - last_sep));
+	char *res = (char *) malloc(sizeof (char) * (len - last_sep));
 	ERR_EXIT(res == NULL);
 
 	strcpy(res, &path[last_sep + 1]);
@@ -177,12 +177,12 @@ char *get_command_name(char *path) {
 };
 
 char **args_to_list(struct cmd *c) {
-	char **args = (char **) malloc((c->argc + 2) * sizeof(char *));
+	char **args = (char **) malloc((c->argc + 2) * sizeof (char *));
 	ERR_EXIT(args == NULL);
-	
+
 	int argind = 0;
 	args[argind++] = get_command_name(c->path);
-	
+
 	struct argentry *a;
 	STAILQ_FOREACH(a, &c->argv, entries) {
 		char *dup = strdup(a->text);

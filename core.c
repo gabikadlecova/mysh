@@ -21,7 +21,7 @@ void init_pwd();
 void init() {
 	/* pwd setup */
 	init_pwd();
-		
+
 	/* internal commands */
 	add_intern_cmd("cd", cd_internal);
 	add_intern_cmd("exit", exit_sh);
@@ -36,7 +36,7 @@ int exit_sh(int argc, char **argv) {
 };
 
 char *get_pwd_path() {
-	char *buf = (char *) malloc(sizeof(char) * PATH_MAX);
+	char *buf = (char *) malloc(sizeof (char) * PATH_MAX);
 	ERR_EXIT(buf == NULL);
 
 	char *res = getcwd(buf, PATH_MAX);
@@ -53,14 +53,14 @@ void init_pwd() {
 
 	set_var("PWD", res, true);
 	set_var("OLD_PWD", NULL, true);
-	
+
 	free(res);
 };
 
 char *get_prompt() {
 	char *pwd = get_var("PWD");
 	char *pname = "mysh:";
-	
+
 	char *prompt = (char *) malloc((strlen(pwd) + strlen(pname) + 3));
 	strcpy(prompt, pname);
 	strcat(prompt, pwd);
@@ -88,7 +88,7 @@ void sigint_handler_ia(int signo) {
 void set_sigaction() {
 	struct sigaction sa;
 	sa.sa_handler = sigint_handler_ia;
-	
+
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART; // necessary for working child signal no
 
@@ -99,17 +99,17 @@ void set_sigaction() {
 int parse_string(char *cmd_string);
 
 int run_interactive() {
-	init(); // todo errors
-	
+	init();
+
 	rl_processing = false;
 
 	set_sigaction();
-		
+
 	char *buffer = NULL;
 	char *prompt = get_prompt();
 	while ((buffer = readline(prompt)) != NULL) {
 		rl_processing = true;
-		
+
 		if (strlen(buffer) > 0) {
 			add_history(buffer);
 		}
@@ -125,19 +125,19 @@ int run_interactive() {
 
 	free(prompt);
 	write(1, "\n", 1);
-	
+
 	int ret_val = get_retval();
 	reset_state();
 
-	return (ret_val);	
+	return (ret_val);
 };
 
-int run_file(FILE *fd) {
+int run_file(char *file_name) {
 	return (0);
 };
 
 int run_string_cmd(char *cmds) {
-	init(); // todo errorval
+	init();
 
 	int parse_ret = parse_string(cmds);
 
@@ -200,7 +200,7 @@ int cd_internal(int argc, char **argv) {
 	}
 
 	int dir_res = chdir(dir);
-	
+
 	if (dir_res == -1) {
 		switch (errno) {
 			case ENOENT:
@@ -213,8 +213,8 @@ int cd_internal(int argc, char **argv) {
 
 	char *pwd = get_var("PWD");
 	set_var("OLDPWD", pwd, true);
-	
-	char *new_pwd = get_pwd_path();	
+
+	char *new_pwd = get_pwd_path();
 	set_var("PWD", new_pwd, true);
 
 	free(new_pwd);
@@ -223,4 +223,3 @@ int cd_internal(int argc, char **argv) {
 
 	return (0);
 };
-

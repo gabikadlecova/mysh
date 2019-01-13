@@ -9,7 +9,7 @@ void add_path(struct cmd *c, const char *path) {
 };
 
 void add_arg(struct cmd *c, const char *argtext) {
-	struct argentry * arg = (struct argentry *) malloc(sizeof(struct argentry));
+	struct argentry * arg = (struct argentry *) malloc(sizeof (struct argentry));
 	ERR_EXIT(arg == NULL);
 
 	arg->text = strdup(argtext);
@@ -21,7 +21,7 @@ void add_arg(struct cmd *c, const char *argtext) {
 	else {
 		STAILQ_INSERT_TAIL(&c->argv, arg, entries);
 	}
-	
+
 	c->argc++;
 };
 
@@ -39,20 +39,20 @@ void add_out(struct cmd *c, const char *outtext, bool isappend) {
 
 
 void push_command(struct cmdpipe *cp, struct cmd *command) {
-	struct cmdentry *new_cmd = (struct cmdentry *) malloc(sizeof(struct cmdentry));
+	struct cmdentry *new_cmd = (struct cmdentry *) malloc(sizeof (struct cmdentry));
 	ERR_EXIT(new_cmd == NULL);
 
 	new_cmd->command = command;
-	
+
 	STAILQ_INSERT_HEAD(&cp->commands, new_cmd, entries);
-	
+
 	cp->cmdc++;
 };
 
 void push_pipe(struct cmdgrp *cg, struct cmdpipe *cp) {
-	struct pipeentry *new_pipe = (struct pipeentry *) malloc(sizeof(struct pipeentry));
+	struct pipeentry *new_pipe = (struct pipeentry *) malloc(sizeof (struct pipeentry));
 	ERR_EXIT(new_pipe == NULL);
-	
+
 	new_pipe->p = cp;
 
 	STAILQ_INSERT_HEAD(&cg->subcmds, new_pipe, entries);
@@ -61,11 +61,11 @@ void push_pipe(struct cmdgrp *cg, struct cmdpipe *cp) {
 };
 
 struct cmd *new_command() {
-	struct cmd *new_cmd = (struct cmd *) malloc(sizeof(struct cmd));
+	struct cmd *new_cmd = (struct cmd *) malloc(sizeof (struct cmd));
 	ERR_EXIT(new_cmd == NULL);
 
 	new_cmd->path = NULL;
-	
+
 	STAILQ_INIT(&new_cmd->argv);
 	new_cmd->argc = 0;
 
@@ -77,7 +77,7 @@ struct cmd *new_command() {
 };
 
 struct cmdpipe *new_pipeline() {
-	struct cmdpipe *new_pipe = (struct cmdpipe *) malloc(sizeof(struct cmdpipe));
+	struct cmdpipe *new_pipe = (struct cmdpipe *) malloc(sizeof (struct cmdpipe));
 	ERR_EXIT(new_pipe == NULL);
 
 	STAILQ_INIT(&new_pipe->commands);
@@ -87,7 +87,7 @@ struct cmdpipe *new_pipeline() {
 };
 
 struct cmdgrp *new_group() {
-	struct cmdgrp *new_grp = (struct cmdgrp*) malloc(sizeof(struct cmdgrp));
+	struct cmdgrp *new_grp = (struct cmdgrp *) malloc(sizeof (struct cmdgrp));
 	ERR_EXIT(new_grp == NULL);
 
 	STAILQ_INIT(&new_grp->subcmds);
@@ -103,13 +103,13 @@ void free_command(struct cmd *c) {
 	while (!STAILQ_EMPTY(&c->argv)) {
 		struct argentry *a = STAILQ_FIRST(&c->argv);
 		STAILQ_REMOVE_HEAD(&c->argv, entries);
-		
+
 		free(a->text);
 		free(a);
 
 		c->argc--;
 	}
-	
+
 	free(c->inpath);
 	c->inpath = NULL;
 
@@ -118,7 +118,7 @@ void free_command(struct cmd *c) {
 
 	c->isappend = false;
 	c->argc = 0;
-	
+
 	free(c);
 };
 
@@ -129,7 +129,7 @@ void free_pipe(struct cmdpipe *cp) {
 
 		free_command(comm->command);
 		free(comm);
-		
+
 		cp->cmdc--;
 	}
 

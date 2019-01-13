@@ -10,11 +10,6 @@
 		err(EXIT_FAILURE, NULL); \
 	}
 
-#define ERR_EXIT_MSG(cond, val, msg) \
-	if (cond) { \
-		err(val, msg); \
-	}
-
 #define	SIG_VAL 128
 #define	SYNTAX_ERR 2
 
