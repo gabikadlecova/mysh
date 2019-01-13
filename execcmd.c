@@ -67,6 +67,7 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 	pid_t pid = fork();
 	ERR_EXIT(pid == -1);
 	// todo handle better fork errno
+	// todo ! signal handler change
 
 	if (pid == 0) {
 		// child
@@ -96,7 +97,9 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 		execvp(c->path, args);
 		//todo handle
 	}
-	
+
+	// check for -1 !
+		
 	close(inpipe);
 	close(outpipe);
 	// todo possible frees? and closes +handle closes
