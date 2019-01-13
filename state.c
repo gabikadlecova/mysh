@@ -39,7 +39,11 @@ int set_var(char *varname, const char *value, bool is_exported) {
 	if (strcmp(varname, "PWD") == 0) {
 		if (value != NULL) {
 			int res = setenv(varname, value, 1);
-			state.pwd_set = res == 0;
+			if (res == -1) {
+				err(EXIT_FAILURE, "cannot set environmental var: ");
+			}
+
+			state.pwd_set = true;
 
 			return (res);
 		}
@@ -51,8 +55,11 @@ int set_var(char *varname, const char *value, bool is_exported) {
 	else if (strcmp(varname, "OLDPWD") == 0) {
 		if (value != NULL) {
 			int res = setenv(varname, value, 1);
+			if (res == -1) {
+				err(EXIT_FAILURE, "cannot set environmental var: ");
+			}
 
-			state.oldpwd_set = res == 0;
+			state.oldpwd_set = true;
 
 			return (res);
 		}
@@ -70,11 +77,9 @@ int set_var(char *varname, const char *value, bool is_exported) {
 
 char *get_var(char *varname) {
 	if (strcmp(varname, "PWD") == 0) {
-		errno = 0;
 		return (state.pwd_set ? strdup(getenv("PWD")) : NULL);
 	}
 	else if (strcmp(varname, "OLDPWD") == 0) {
-		errno = 0;
 		return (state.oldpwd_set ? strdup(getenv("OLDPWD")) : NULL);
 	}
 	else {
@@ -109,8 +114,12 @@ int run_intern_cmd(char *cmd, int argc, char **argv) {
 	while (icmd != NULL) {
 		if (strcmp(icmd->name, cmd) == 0) {
 			int res = icmd->func(argc, argv);
+			set_retval(res);
+
 			return (res);
 		}
+
+		icmd = SLIST_NEXT(icmd, entries);
 	}
 	
 	return (-1);

@@ -15,21 +15,24 @@
 #include "mysh.tab.h"
 
 int cd_internal(int argc, char **argv);
+int exit_sh(int argc, char **argv);
 
-int init_pwd();
-int init() {
+void init_pwd();
+void init() {
 	/* pwd setup */
-	int pwd_res = init_pwd();
-	// todo check retval
-	
-	/* pgid setup */
-	int pgid_res = setpgid(0, 0); 
-	ERR_EXIT(pgid_res == -1);
-
+	init_pwd();
+		
 	/* internal commands */
 	add_intern_cmd("cd", cd_internal);
+	add_intern_cmd("exit", exit_sh);
+};
 
-	// set_retval(0); // init success
+int exit_sh(int argc, char **argv) {
+	if (argc > 1) {
+		return (2); // treated as syntax error
+	}
+
+	exit(get_retval());
 };
 
 char *get_pwd_path() {
@@ -45,15 +48,13 @@ char *get_pwd_path() {
 	return (res);
 };
 
-int init_pwd() {
+void init_pwd() {
 	char *res = get_pwd_path();
 
-	int var_res = set_var("PWD", res, true);
-	// todo errval
-	var_res = set_var("OLD_PWD", NULL, true);
+	set_var("PWD", res, true);
+	set_var("OLD_PWD", NULL, true);
 	
 	free(res);
-	return (0);
 };
 
 char *get_prompt() {
@@ -84,17 +85,15 @@ void sigint_handler_ia(int signo) {
 	rl_redisplay();
 };
 
-int set_sigaction() {
+void set_sigaction() {
 	struct sigaction sa;
 	sa.sa_handler = sigint_handler_ia;
 	
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
+	sa.sa_flags = SA_RESTART; // necessary for working child signal no
 
 	int sa_res = sigaction(SIGINT, &sa, NULL);
-	// todo errors
-
-	return (sa_res);
+	ERR_EXIT(sa_res == -1); // invalid behavior
 };
 
 int parse_string(char *cmd_string);
@@ -104,9 +103,8 @@ int run_interactive() {
 	
 	rl_processing = false;
 
-	int sa_res = set_sigaction();
-	// todo errors
-	
+	set_sigaction();
+		
 	char *buffer = NULL;
 	char *prompt = get_prompt();
 	while ((buffer = readline(prompt)) != NULL) {
@@ -116,7 +114,7 @@ int run_interactive() {
 			add_history(buffer);
 		}
 
-		int parse_ret = parse_string(buffer);
+		parse_string(buffer);
 		free(buffer);
 
 		free(prompt);
@@ -128,12 +126,10 @@ int run_interactive() {
 	free(prompt);
 	write(1, "\n", 1);
 	
-	// todo return sth
-	// todo return value handling etc
-	
-	// todo remove 
+	int ret_val = get_retval();
 	reset_state();
-	return (0);	
+
+	return (ret_val);	
 };
 
 int run_file(FILE *fd) {
@@ -144,11 +140,10 @@ int run_string_cmd(char *cmds) {
 	init(); // todo errorval
 
 	int parse_ret = parse_string(cmds);
-	// todo return sth, handle retval...
 
-	// todo remove
+	int ret_val = get_retval();
 	reset_state();
-	return (0);
+	return (ret_val);
 };
 
 int parse_string(char *cmd_string) {
@@ -168,7 +163,13 @@ int parse_string(char *cmd_string) {
 	yy_delete_buffer(buffer_state);
 
 	free(buffer);
-	return (parse_ret);
+
+	if (parse_ret > 0) {
+		set_retval(SYNTAX_ERR);
+		return (SYNTAX_ERR);
+	}
+
+	return (0);
 };
 
 int cd_internal(int argc, char **argv) {
@@ -189,18 +190,26 @@ int cd_internal(int argc, char **argv) {
 
 			break;
 		default:
-			// todo fprintf
-			return (-1);
+			fprintf(stderr, "usage: cd <dir>\n");
+			return (SYNTAX_ERR);
 	}
 
 	if (dir == NULL) {
-		return (-1);
+		fprintf(stderr, "error: OLDPWD is not set\n");
+		return (1);
 	}
 
-	
-
-	// todo check errors
 	int dir_res = chdir(dir);
+	
+	if (dir_res == -1) {
+		switch (errno) {
+			case ENOENT:
+				fprintf(stderr, "cd: %s: No such file or directory\n", dir);
+				return (1);
+			default:
+				ERR_EXIT(1);
+		}
+	}
 
 	char *pwd = get_var("PWD");
 	set_var("OLDPWD", pwd, true);
@@ -212,7 +221,6 @@ int cd_internal(int argc, char **argv) {
 	free(pwd);
 	free(dir);
 
-	// todo errors
 	return (0);
 };
 

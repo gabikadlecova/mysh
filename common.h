@@ -16,5 +16,6 @@
 	}
 
 #define	SIG_VAL 128
+#define	SYNTAX_ERR 2
 
 #endif // _COMMON_H_
