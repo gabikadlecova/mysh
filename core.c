@@ -7,6 +7,8 @@
 #include <signal.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "common.h"
 #include "core.h"
@@ -133,7 +135,22 @@ int run_interactive() {
 };
 
 int run_file(char *file_name) {
-	return (0);
+	init();
+	
+	FILE *fd = fopen(file_name, "r");
+	if (fd == NULL) {
+		err(1, NULL);
+	}
+
+	yyin = fd;
+	int parse_val = yyparse();
+	fclose(fp);
+
+	if (parse_val > 0) {
+		return (SYNTAX_ERR);
+	}
+	
+	return (get_retval());
 };
 
 int run_string_cmd(char *cmds) {
