@@ -67,12 +67,12 @@ int exec_pipe(struct cmdpipe *cp) {
 		if (WIFEXITED(wstat)) {
 			result = WEXITSTATUS(wstat);
 		}
-		else if (WIFSIGNALED(wstatus)) {
+		else if (WIFSIGNALED(wstat)) {
 			int sig = WTERMSIG(wstat);
 			fprintf(stderr, "Killed by signal %d\n", sig);
 			result = sig + SIG_VAL;
 		}
-		else if (WIFSTOPPED(wstatus)) {
+		else if (WIFSTOPPED(wstat)) {
 			int sig = WSTOPSIG(wstat);
 			fprintf(stderr, "Stopped by signal %d\n", WSTOPSIG(wstat));
 			result = sig + SIG_VAL;
