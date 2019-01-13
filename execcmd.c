@@ -98,10 +98,13 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 		//todo handle
 	}
 
-	// check for -1 !
-		
-	close(inpipe);
-	close(outpipe);
+	if (inpipe != -1) {
+		close(inpipe);
+	}
+
+	if (outpipe != -1) {
+		close(outpipe);
+	}
 	// todo possible frees? and closes +handle closes
 	return (pid);
 };

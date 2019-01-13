@@ -1,6 +1,6 @@
 CC=cc
 DEPS = *.h
-OBJ = commands.o execcmd.o main.o
+OBJ = commands.o execcmd.o core.o state.o main.o
 CFLAGS = -g
 
 mysh: bison flex mysh.l mysh.y $(OBJ)

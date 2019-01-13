@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "commands.h"
 #include "common.h"
 #include "string.h"
@@ -66,7 +67,8 @@ struct cmd *new_command() {
 	new_cmd->path = NULL;
 	
 	STAILQ_INIT(&new_cmd->argv);
-	
+	new_cmd->argc = 0;
+
 	new_cmd->inpath = NULL;
 	new_cmd->outpath = NULL;
 	new_cmd->isappend = false;
