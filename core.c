@@ -144,8 +144,9 @@ int run_file(char *file_name) {
 
 	yyin = fd;
 	int parse_val = yyparse();
-	fclose(fp);
+	fclose(fd);
 
+	reset_state();
 	if (parse_val > 0) {
 		return (SYNTAX_ERR);
 	}

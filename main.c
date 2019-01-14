@@ -9,7 +9,7 @@
 int
 main(int argc, char **argv)
 {
-	int ret_val;
+	int ret_val = 0;
 	int opt;
 
 	if (argc == 1) {
