@@ -1,3 +1,0 @@
-echo X;
-echo Y; echo Z
-cat "execcmd.c" | wc -l
