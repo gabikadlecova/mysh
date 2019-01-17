@@ -1,6 +1,6 @@
 # subfolders
-./bin/*
-./obj/*
+bin
+out
 
 # cstyle check
 cstyle.pl
