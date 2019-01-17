@@ -1,3 +1,7 @@
+# subfolders
+./bin/
+./obj/
+
 # cstyle check
 cstyle.pl
 
@@ -5,7 +9,7 @@ cstyle.pl
 *.tab.h
 *.tab.c
 lex.yy.c
-
+myshlex.h
 
 # Prerequisites
 *.d
