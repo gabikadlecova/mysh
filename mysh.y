@@ -26,6 +26,7 @@ extern int yylineno;
 %token REDIR_R
 %token REDIR_A
 %token REDIR_L
+%token UNSUP
 
 %type <pipeline> pipeln
 %type <group> grp
@@ -75,4 +76,3 @@ comtokens
   ;
 
 %%
-

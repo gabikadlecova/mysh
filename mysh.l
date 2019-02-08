@@ -5,6 +5,7 @@
 
 %{
 # include "mysh.tab.h"
+
 %}
 
 %%
@@ -17,6 +18,7 @@
 "<"             { return REDIR_L; }
 "\n"            { return NL; }
 "#"[^\n]*       {}
+[}{$&\)(*`="'~] { return UNSUP; }
 .               {}
 
 %%

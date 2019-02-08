@@ -19,6 +19,7 @@
 int cd_internal(int argc, char **argv);
 int exit_sh(int argc, char **argv);
 
+/* Shell state initialization. */
 void init_pwd();
 void init() {
 	/* pwd setup */
@@ -29,16 +30,8 @@ void init() {
 	add_intern_cmd("exit", exit_sh);
 }
 
-int exit_sh(int argc, char **argv) {
-	if (argc > 1) {
-		warn("Syntax error: unused parameters %s, ...", argv[1]);
-		return (2); // treated as syntax error
-	}
-
-	exit(get_retval());
-}
-
-char *get_pwd_path() {
+/* Gets path of the current working directiory. */
+char *get_cwd_path() {
 	char *buf = malloc(sizeof (char) * PATH_MAX);
 	ERR_EXIT(buf == NULL);
 
@@ -52,7 +45,7 @@ char *get_pwd_path() {
 }
 
 void init_pwd() {
-	char *res = get_pwd_path();
+	char *res = get_cwd_path();
 
 	set_var("PWD", res, true);
 	set_var("OLD_PWD", NULL, true);
@@ -60,6 +53,7 @@ void init_pwd() {
 	free(res);
 }
 
+/* Composes current prompt with the current path. */
 char *get_prompt() {
 	char *pwd = get_var("PWD");
 	char *pname = "mysh:";
@@ -74,24 +68,33 @@ char *get_prompt() {
 	return (prompt);
 }
 
+/* Indicates if readline is in its main cycle. */
 bool rl_processing;
+
+/* Signal handler for SIGINT. */
 void sigint_handler_ia(int signo) {
 	if (signo != SIGINT) {
 		return;
 	}
 
+	// prints a new line
 	rl_crlf();
+
+	// prints the prompt if needed
 	if (rl_processing) {
 		rl_on_new_line_with_prompt();
 	}
 	else {
 		rl_on_new_line();
 	}
+
+	// clear line
 	rl_replace_line("", 0);
 
 	rl_redisplay();
 }
 
+/* Signal handler setup */
 void set_sigaction() {
 	struct sigaction sa;
 	sa.sa_handler = sigint_handler_ia;
@@ -105,6 +108,7 @@ void set_sigaction() {
 
 int parse_string(char *cmd_string);
 
+/* Interactive mode. */
 int run_interactive() {
 	init();
 
@@ -121,6 +125,7 @@ int run_interactive() {
 			add_history(buffer);
 		}
 
+		// processes and executes the command line
 		parse_string(buffer);
 		free(buffer);
 
@@ -130,6 +135,7 @@ int run_interactive() {
 		rl_processing = false;
 	}
 
+	// end of input
 	free(prompt);
 	write(1, "\n", 1);
 
@@ -139,6 +145,7 @@ int run_interactive() {
 	return (ret_val);
 }
 
+/* File mode. */
 int run_file(char *file_name) {
 	init();
 
@@ -147,6 +154,7 @@ int run_file(char *file_name) {
 		err(1, NULL);
 	}
 
+	// process and execute commands
 	yyin = fd;
 	int parse_val = yyparse();
 	fclose(fd);
@@ -159,6 +167,7 @@ int run_file(char *file_name) {
 	return (get_retval());
 }
 
+/* String mode. */
 int run_string_cmd(char *cmds) {
 	init();
 
@@ -169,6 +178,7 @@ int run_string_cmd(char *cmds) {
 	return (ret_val);
 }
 
+/* Processes one command string. */
 int parse_string(char *cmd_string) {
 	int len;
 	if ((len = strlen(cmd_string)) == 0) {
@@ -195,18 +205,33 @@ int parse_string(char *cmd_string) {
 	return (0);
 }
 
+/* Internal command, exits shell. */
+int exit_sh(int argc, char **argv) {
+	if (argc > 1) {
+		warn("Syntax error: unused parameters %s, ...", argv[1]);
+		return (2); // treated as syntax error
+	}
+
+	exit(get_retval());
+}
+
+/* Internal command - changes directory. */
 int cd_internal(int argc, char **argv) {
 	char *dir = NULL;
+
 	switch (argc) {
 		case 1:
+			// destination is home dir
 			dir = strdup(getenv("HOME"));
 			ERR_EXIT(dir == NULL);
 			break;
 		case 2:
+			// destination is previous dir
 			if (strcmp(argv[1], "-") == 0) {
 				dir = get_var("OLDPWD");
 			}
 			else {
+				// destination is a path
 				dir = strdup(argv[1]);
 				ERR_EXIT(dir == NULL);
 			}
@@ -217,11 +242,16 @@ int cd_internal(int argc, char **argv) {
 			return (SYNTAX_ERR);
 	}
 
+	/* 
+	 * if this line is reached, dir is either a valid path
+	 * or it should be OLDPWD, but the value is not set.
+	 */
 	if (dir == NULL) {
 		fprintf(stderr, "error: OLDPWD is not set\n");
 		return (1);
 	}
 
+	// try to change directory
 	int dir_res = chdir(dir);
 
 	if (dir_res == -1) {
@@ -236,10 +266,11 @@ int cd_internal(int argc, char **argv) {
 		}
 	}
 
+	// set environmental variables
 	char *pwd = get_var("PWD");
 	set_var("OLDPWD", pwd, true);
 
-	char *new_pwd = get_pwd_path();
+	char *new_pwd = get_cwd_path();
 	set_var("PWD", new_pwd, true);
 
 	free(new_pwd);

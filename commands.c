@@ -3,11 +3,18 @@
 #include "common.h"
 #include "string.h"
 
+/*
+ * Copies the path string to the command structure.
+ */
 void add_path(struct cmd *c, const char *path) {
 	c->path = strdup(path);
 	ERR_EXIT(c->path == NULL);
 }
 
+/*
+ * Creates an arg queue entry, copies the argument text and
+ * adds it to the arg list.
+ */
 void add_arg(struct cmd *c, const char *argtext) {
 	struct argentry * arg = malloc(sizeof (struct argentry));
 	ERR_EXIT(arg == NULL);
@@ -25,11 +32,18 @@ void add_arg(struct cmd *c, const char *argtext) {
 	c->argc++;
 }
 
+/*
+ * Copies input file path to the command structure.
+ */
 void add_in(struct cmd *c, const char *intext) {
 	c->inpath = strdup(intext);
 	ERR_EXIT(c->inpath == NULL);
 }
 
+/*
+ * Copies output file path to the command structure. Enables to set
+ * the append flag.
+ */
 void add_out(struct cmd *c, const char *outtext, bool isappend) {
 	c->outpath = strdup(outtext);
 	ERR_EXIT(c->outpath == NULL);
@@ -37,7 +51,9 @@ void add_out(struct cmd *c, const char *outtext, bool isappend) {
 	c->isappend = isappend;
 }
 
-
+/*
+ * Pushes a command to the head of a command pipeline.
+ */
 void push_command(struct cmdpipe *cp, struct cmd *command) {
 	struct cmdentry *new_cmd = malloc(sizeof (struct cmdentry));
 	ERR_EXIT(new_cmd == NULL);
@@ -49,6 +65,9 @@ void push_command(struct cmdpipe *cp, struct cmd *command) {
 	cp->cmdc++;
 }
 
+/*
+ * Pushes a command pipeline to the head of a command group.
+ */
 void push_pipe(struct cmdgrp *cg, struct cmdpipe *cp) {
 	struct pipeentry *new_pipe = malloc(sizeof (struct pipeentry));
 	ERR_EXIT(new_pipe == NULL);
@@ -60,6 +79,9 @@ void push_pipe(struct cmdgrp *cg, struct cmdpipe *cp) {
 	cg->pipec++;
 }
 
+/*
+ * Creates a new command with default member values.
+ */
 struct cmd *new_command() {
 	struct cmd *new_cmd = malloc(sizeof (struct cmd));
 	ERR_EXIT(new_cmd == NULL);
@@ -76,6 +98,9 @@ struct cmd *new_command() {
 	return (new_cmd);
 }
 
+/*
+ * Creates a new command pipeline with default member values.
+ */
 struct cmdpipe *new_pipeline() {
 	struct cmdpipe *new_pipe = malloc(sizeof (struct cmdpipe));
 	ERR_EXIT(new_pipe == NULL);
@@ -86,6 +111,9 @@ struct cmdpipe *new_pipeline() {
 	return (new_pipe);
 }
 
+/*
+ * Creates a new command group with default member values.
+ */
 struct cmdgrp *new_group() {
 	struct cmdgrp *new_grp = malloc(sizeof (struct cmdgrp));
 	ERR_EXIT(new_grp == NULL);
@@ -96,6 +124,9 @@ struct cmdgrp *new_group() {
 	return (new_grp);
 }
 
+/*
+ * Frees the command including its members.
+ */
 void free_command(struct cmd *c) {
 	free(c->path);
 	c->path = NULL;
@@ -122,6 +153,9 @@ void free_command(struct cmd *c) {
 	free(c);
 }
 
+/*
+ * Frees the command pipeline along with its members.
+ */
 void free_pipe(struct cmdpipe *cp) {
 	while (!STAILQ_EMPTY(&cp->commands)) {
 		struct cmdentry *comm = STAILQ_FIRST(&cp->commands);
@@ -136,6 +170,9 @@ void free_pipe(struct cmdpipe *cp) {
 	free(cp);
 }
 
+/*
+ * Frees the command group along with its members.
+ */
 void free_group(struct cmdgrp *cg) {
 	while (!STAILQ_EMPTY(&cg->subcmds)) {
 		struct pipeentry *p = STAILQ_FIRST(&cg->subcmds);
