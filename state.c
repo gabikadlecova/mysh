@@ -38,7 +38,7 @@ struct mysh_state state = {
 
 /*
  * Set environmental or internal variable.
- * 
+ *
  * Only PWD and OLDPWD supported in this version.
  */
 int set_var(char *varname, const char *value, bool is_exported) {
@@ -49,7 +49,7 @@ int set_var(char *varname, const char *value, bool is_exported) {
 				err(EXIT_FAILURE,
 					"cannot set environmental var: ");
 			}
-			
+
 			// indicates that the value is valid
 			state.pwd_set = true;
 
@@ -94,7 +94,7 @@ int set_var(char *varname, const char *value, bool is_exported) {
 /*
  * Gets environmental or internal variable by name. Returns NULL
  * if the variable is not set.
- * 
+ *
  * Only PWD and OLDPWD are supported in this version.
  */
 char *get_var(char *varname) {
@@ -137,7 +137,7 @@ bool is_intern_cmd(char *cmd) {
 	return (false);
 }
 
-/* 
+/*
  * Runs an internal cmd with specified arguments.
  *
  * Returns -1 if the command is not an internal command.

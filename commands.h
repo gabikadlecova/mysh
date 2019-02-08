@@ -1,7 +1,7 @@
 /*
  * This header contains declarations of structures
  * representing a command line structure.
- * 
+ *
  * Functions for manipulating the structure (creation,
  * destruction) are provided as well.
  */
@@ -25,10 +25,10 @@ struct argentry {
 /*
  * Single command with arguments, input file name (or NULL if not
  * provided), output file name (or NULL if not provided).
- * 
+ *
  * If there is an output file name, isappend indicates whether
  * it should be opened for append or truncated.
- * 
+ *
  */
 struct cmd {
 	char *path;

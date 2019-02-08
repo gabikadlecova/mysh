@@ -242,8 +242,8 @@ int cd_internal(int argc, char **argv) {
 			return (SYNTAX_ERR);
 	}
 
-	/* 
-	 * if this line is reached, dir is either a valid path
+	/*
+	 * If this line is reached, dir is either a valid path
 	 * or it should be OLDPWD, but the value is not set.
 	 */
 	if (dir == NULL) {

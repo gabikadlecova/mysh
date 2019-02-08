@@ -24,7 +24,7 @@ int exec_group(struct cmdgrp *cg) {
 	struct pipeentry *p;
 	STAILQ_FOREACH(p, &cg->subcmds, entries) {
 		result = exec_pipe(p->p);
-		
+
 		// pipeline terminated by a signal
 		if (result > SIG_VAL) {
 			// command group must be terminated as well
@@ -117,11 +117,11 @@ char **args_to_list(struct cmd *c);
 
 /* Executes a command. */
 pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
-	
+
 	// separate handling of internal commands
 	if (is_intern_cmd(c->path)) {
 		char **argv = args_to_list(c);
-		
+
 		// argc is number of commands, not counting cmd path
 		run_intern_cmd(c->path, c->argc + 1, argv);
 
@@ -197,7 +197,7 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 		char **args = args_to_list(c);
 
 		execvp(c->path, args);
-		
+
 		// invalid execution
 		err(127, c->path);
 

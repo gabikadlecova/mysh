@@ -39,7 +39,7 @@ main(int argc, char **argv)
 		return (1);
 	}
 
-	// single string argument - string command mode 
+	// single string argument - string command mode
 	run_file(argv[optind]);
 	return (ret_val);
 }
