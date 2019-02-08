@@ -1,5 +1,7 @@
 %option noyywrap
 %option header-file="myshlex.h"
+%option nounput
+%option noinput
 
 %{
 # include "mysh.tab.h"

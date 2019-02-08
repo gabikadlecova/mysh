@@ -36,8 +36,11 @@ extern int yylineno;
 %destructor { free_group($$); } grp
 
 %{
-	int yyerror(const char *s) {
-		fprintf(stderr, "error:%d: syntax error near unexpected token '%s'\n", yylineno, yytext);
+	int yyerror() {
+		fprintf(stderr,
+			"error:%d: syntax error near unexpected token '%s'\n",
+			yylineno, yytext);
+		return (0);
 	};
 %}
 %%
@@ -61,9 +64,11 @@ pipeln
 
 com
   : comtokens
-  | com REDIR_R TEXT { yyerror(NULL); return(1); $$ = $1; add_out($$, $3, false); }
+  | com REDIR_R TEXT { yyerror(NULL); return(1); $$ = $1;
+  			add_out($$, $3, false);}
   | com REDIR_L TEXT { yyerror(NULL); return(1); $$ = $1; add_in($$, $3); }
-  | com REDIR_A TEXT { yyerror(NULL); return(1); $$ = $1; add_out($$, $3, true); }
+  | com REDIR_A TEXT { yyerror(NULL); return(1); $$ = $1;
+  			add_out($$, $3, true); }
   ;
 
 comtokens

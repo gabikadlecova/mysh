@@ -28,7 +28,7 @@ int exec_group(struct cmdgrp *cg) {
 
 	set_retval(result);
 	return (result);
-};
+}
 
 int exec_pipe(struct cmdpipe *cp) {
 	int result = 0;
@@ -70,11 +70,14 @@ int exec_pipe(struct cmdpipe *cp) {
 		else if (WIFSIGNALED(wstat)) {
 			int sig = WTERMSIG(wstat);
 			fprintf(stderr, "Killed by signal %d\n", sig);
+			
 			result = sig + SIG_VAL;
 		}
 		else if (WIFSTOPPED(wstat)) {
 			int sig = WSTOPSIG(wstat);
-			fprintf(stderr, "Stopped by signal %d\n", WSTOPSIG(wstat));
+			fprintf(stderr, "Stopped by signal %d\n",
+				WSTOPSIG(wstat));
+			
 			result = sig + SIG_VAL;
 		}
 		else {
@@ -83,13 +86,13 @@ int exec_pipe(struct cmdpipe *cp) {
 
 	}
 	else {
-		result = get_retval(); // internal commands are expected to set retval
+		result = get_retval(); // internal commands should set retval
 	}
 
 	while (wait(NULL) != -1); // wait for the other pipe processes
 
 	return (result);
-};
+}
 
 char **args_to_list(struct cmd *c);
 
@@ -145,7 +148,7 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 	}
 
 	return (pid);
-};
+}
 
 char *get_command_name(char *path) {
 	if (path == NULL) {
@@ -168,16 +171,16 @@ char *get_command_name(char *path) {
 		return (res);
 	}
 
-	char *res = (char *) malloc(sizeof (char) * (len - last_sep));
+	char *res = malloc(sizeof (char) * (len - last_sep));
 	ERR_EXIT(res == NULL);
 
 	strcpy(res, &path[last_sep + 1]);
 
 	return (res);
-};
+}
 
 char **args_to_list(struct cmd *c) {
-	char **args = (char **) malloc((c->argc + 2) * sizeof (char *));
+	char **args = malloc((c->argc + 2) * sizeof (char *));
 	ERR_EXIT(args == NULL);
 
 	int argind = 0;
@@ -194,4 +197,4 @@ char **args_to_list(struct cmd *c) {
 	args[argind] = (char *) NULL;
 
 	return (args);
-};
+}

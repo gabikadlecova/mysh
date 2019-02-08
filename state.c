@@ -40,7 +40,8 @@ int set_var(char *varname, const char *value, bool is_exported) {
 		if (value != NULL) {
 			int res = setenv(varname, value, 1);
 			if (res == -1) {
-				err(EXIT_FAILURE, "cannot set environmental var: ");
+				err(EXIT_FAILURE,
+					"cannot set environmental var: ");
 			}
 
 			state.pwd_set = true;
@@ -56,7 +57,8 @@ int set_var(char *varname, const char *value, bool is_exported) {
 		if (value != NULL) {
 			int res = setenv(varname, value, 1);
 			if (res == -1) {
-				err(EXIT_FAILURE, "cannot set environmental var: ");
+				err(EXIT_FAILURE,
+					"cannot set environmental var: ");
 			}
 
 			state.oldpwd_set = true;
@@ -68,12 +70,16 @@ int set_var(char *varname, const char *value, bool is_exported) {
 		}
 	}
 	else {
+		if (is_exported) {
+
+		}
+
 		errno = ENOSYS;
 		return (-1);
 	}
 
 	return (0);
-};
+}
 
 char *get_var(char *varname) {
 	if (strcmp(varname, "PWD") == 0) {
@@ -88,15 +94,15 @@ char *get_var(char *varname) {
 	}
 
 	return (0);
-};
+}
 
 void set_retval(int value) {
 	state.retval = value;
-};
+}
 
 int get_retval() {
 	return (state.retval);
-};
+}
 
 bool is_intern_cmd(char *cmd) {
 	struct intern_cmd *icmd;
@@ -107,7 +113,7 @@ bool is_intern_cmd(char *cmd) {
 	}
 
 	return (false);
-};
+}
 
 int run_intern_cmd(char *cmd, int argc, char **argv) {
 	struct intern_cmd *icmd = SLIST_FIRST(&state.intern_cmds);
@@ -123,10 +129,10 @@ int run_intern_cmd(char *cmd, int argc, char **argv) {
 	}
 
 	return (-1);
-};
+}
 
 void add_intern_cmd(char *cmd, sh_func cmd_func) {
-	struct intern_cmd *icmd = (struct intern_cmd *) malloc(sizeof (struct intern_cmd));
+	struct intern_cmd *icmd = malloc(sizeof (struct intern_cmd));
 	ERR_EXIT(icmd == NULL);
 
 	icmd->name = strdup(cmd);
@@ -135,7 +141,7 @@ void add_intern_cmd(char *cmd, sh_func cmd_func) {
 	icmd->func = cmd_func;
 
 	SLIST_INSERT_HEAD(&state.intern_cmds, icmd, entries);
-};
+}
 
 void reset_state() {
 	struct intern_cmd *icmd;
@@ -151,4 +157,4 @@ void reset_state() {
 	state.retval = 0;
 	state.pwd_set = false;
 	state.oldpwd_set = false;
-};
+}

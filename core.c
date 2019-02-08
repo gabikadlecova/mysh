@@ -27,18 +27,19 @@ void init() {
 	/* internal commands */
 	add_intern_cmd("cd", cd_internal);
 	add_intern_cmd("exit", exit_sh);
-};
+}
 
 int exit_sh(int argc, char **argv) {
 	if (argc > 1) {
+		warn("Syntax error: unused parameters %s, ...", argv[1]);
 		return (2); // treated as syntax error
 	}
 
 	exit(get_retval());
-};
+}
 
 char *get_pwd_path() {
-	char *buf = (char *) malloc(sizeof (char) * PATH_MAX);
+	char *buf = malloc(sizeof (char) * PATH_MAX);
 	ERR_EXIT(buf == NULL);
 
 	char *res = getcwd(buf, PATH_MAX);
@@ -48,7 +49,7 @@ char *get_pwd_path() {
 	};
 
 	return (res);
-};
+}
 
 void init_pwd() {
 	char *res = get_pwd_path();
@@ -57,13 +58,13 @@ void init_pwd() {
 	set_var("OLD_PWD", NULL, true);
 
 	free(res);
-};
+}
 
 char *get_prompt() {
 	char *pwd = get_var("PWD");
 	char *pname = "mysh:";
 
-	char *prompt = (char *) malloc((strlen(pwd) + strlen(pname) + 3));
+	char *prompt = malloc((strlen(pwd) + strlen(pname) + 3));
 	strcpy(prompt, pname);
 	strcat(prompt, pwd);
 	strcat(prompt, "> ");
@@ -71,10 +72,14 @@ char *get_prompt() {
 	free(pwd);
 
 	return (prompt);
-};
+}
 
 bool rl_processing;
 void sigint_handler_ia(int signo) {
+	if (signo != SIGINT) {
+		return;
+	}
+	
 	rl_crlf();
 	if (rl_processing) {
 		rl_on_new_line_with_prompt();
@@ -85,7 +90,7 @@ void sigint_handler_ia(int signo) {
 	rl_replace_line("", 0);
 
 	rl_redisplay();
-};
+}
 
 void set_sigaction() {
 	struct sigaction sa;
@@ -96,7 +101,7 @@ void set_sigaction() {
 
 	int sa_res = sigaction(SIGINT, &sa, NULL);
 	ERR_EXIT(sa_res == -1); // invalid behavior
-};
+}
 
 int parse_string(char *cmd_string);
 
@@ -132,7 +137,7 @@ int run_interactive() {
 	reset_state();
 
 	return (ret_val);
-};
+}
 
 int run_file(char *file_name) {
 	init();
@@ -152,17 +157,17 @@ int run_file(char *file_name) {
 	}
 	
 	return (get_retval());
-};
+}
 
 int run_string_cmd(char *cmds) {
 	init();
 
-	int parse_ret = parse_string(cmds);
+	parse_string(cmds);
 
 	int ret_val = get_retval();
 	reset_state();
 	return (ret_val);
-};
+}
 
 int parse_string(char *cmd_string) {
 	int len;
@@ -188,7 +193,7 @@ int parse_string(char *cmd_string) {
 	}
 
 	return (0);
-};
+}
 
 int cd_internal(int argc, char **argv) {
 	char *dir = NULL;
@@ -222,7 +227,9 @@ int cd_internal(int argc, char **argv) {
 	if (dir_res == -1) {
 		switch (errno) {
 			case ENOENT:
-				fprintf(stderr, "cd: %s: No such file or directory\n", dir);
+				fprintf(stderr,
+					"cd: %s: No such file or directory\n",
+					dir);
 				return (1);
 			default:
 				ERR_EXIT(1);
@@ -240,4 +247,4 @@ int cd_internal(int argc, char **argv) {
 	free(dir);
 
 	return (0);
-};
+}

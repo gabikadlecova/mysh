@@ -12,6 +12,8 @@ main(int argc, char **argv)
 	int ret_val = 0;
 	int opt;
 
+	char *usage = "usage: mysh | mysh [-c Cmd] | mysh arg1";
+
 	if (argc == 1) {
 		ret_val = run_interactive();
 		return (ret_val);
@@ -23,14 +25,14 @@ main(int argc, char **argv)
 				ret_val = run_string_cmd(optarg);
 				return (ret_val);
 			default:
-				fprintf(stderr, "usage: mysh | mysh [-c Cmd] | mysh arg1");
+				fprintf(stderr, usage);
 				return (1);
 
 		}
 	}
 	
 	if (argc > 2) {
-		fprintf(stderr, "usage: mysh | mysh [-c Cmd] | mysh arg1");
+		fprintf(stderr, usage);
 		return (1);
 	}
 
