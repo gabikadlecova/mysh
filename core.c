@@ -79,7 +79,7 @@ void sigint_handler_ia(int signo) {
 	if (signo != SIGINT) {
 		return;
 	}
-	
+
 	rl_crlf();
 	if (rl_processing) {
 		rl_on_new_line_with_prompt();
@@ -141,7 +141,7 @@ int run_interactive() {
 
 int run_file(char *file_name) {
 	init();
-	
+
 	FILE *fd = fopen(file_name, "r");
 	if (fd == NULL) {
 		err(1, NULL);
@@ -155,7 +155,7 @@ int run_file(char *file_name) {
 	if (parse_val > 0) {
 		return (SYNTAX_ERR);
 	}
-	
+
 	return (get_retval());
 }
 

@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/queue.h>
 #include <error.h>
@@ -70,18 +72,19 @@ int exec_pipe(struct cmdpipe *cp) {
 		else if (WIFSIGNALED(wstat)) {
 			int sig = WTERMSIG(wstat);
 			fprintf(stderr, "Killed by signal %d\n", sig);
-			
+
 			result = sig + SIG_VAL;
 		}
 		else if (WIFSTOPPED(wstat)) {
 			int sig = WSTOPSIG(wstat);
 			fprintf(stderr, "Stopped by signal %d\n",
 				WSTOPSIG(wstat));
-			
+
 			result = sig + SIG_VAL;
 		}
 		else {
-			fprintf(stderr, "Child terminated with unknown status");
+			fprintf(stderr,
+				"Child terminated with unknown status\n");
 		}
 
 	}
@@ -114,7 +117,7 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 	if (pid == 0) {
 		// child
 		if (inpipe != -1) {
-			dup2(inpipe, 0);
+			ERR_EXIT(dup2(inpipe, 0) == -1);
 
 			if (inpipe != 0) {
 				close(inpipe);
@@ -122,14 +125,52 @@ pid_t exec_cmd(struct cmd *c, int inpipe, int outpipe) {
 		}
 
 		if (outpipe != -1) {
-			dup2(outpipe, 1);
+			ERR_EXIT(dup2(outpipe, 1) == -1);
 
 			if (outpipe != 1) {
 				close(outpipe);
 			}
 		}
 
-		// todo redirections
+		if (c->inpath != NULL) {
+			int indes = open(c->inpath, O_RDONLY);
+			if (indes == -1) {
+				fprintf(stderr, "%s: %s\n", c->path,
+					strerror(errno));
+
+				return (1);
+			}
+
+			ERR_EXIT(dup2(indes, 0) == -1);
+
+			if (indes != 0) {
+				close(indes);
+			}
+		}
+
+		if (c->outpath != NULL) {
+			int flags;
+			if (c->isappend) {
+				flags = O_WRONLY | O_CREAT | O_APPEND;
+			}
+			else {
+				flags = O_WRONLY | O_CREAT | O_TRUNC;
+			}
+
+			int outdes = open(c->outpath, flags, 0666);
+			if (outdes == -1) {
+				fprintf(stderr, "%s: %s\n", c->path,
+					strerror(errno));
+
+				return (1);
+			}
+
+			ERR_EXIT(dup2(outdes, 1) == -1)
+
+			if (outdes != 1) {
+				close(outdes);
+			}
+		}
 
 		char **args = args_to_list(c);
 
