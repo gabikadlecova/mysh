@@ -40,6 +40,6 @@ main(int argc, char **argv)
 	}
 
 	// single string argument - string command mode
-	run_file(argv[optind]);
+	ret_val = run_file(argv[optind]);
 	return (ret_val);
 }

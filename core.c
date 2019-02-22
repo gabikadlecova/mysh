@@ -159,12 +159,13 @@ int run_file(char *file_name) {
 	int parse_val = yyparse();
 	fclose(fd);
 
+	int ret_val = get_retval();
 	reset_state();
 	if (parse_val > 0) {
 		return (SYNTAX_ERR);
 	}
 
-	return (get_retval());
+	return (ret_val);
 }
 
 /* String mode. */
@@ -202,14 +203,14 @@ int parse_string(char *cmd_string) {
 		return (SYNTAX_ERR);
 	}
 
-	return (0);
+	return (get_retval());
 }
 
 /* Internal command, exits shell. */
 int exit_sh(int argc, char **argv) {
 	if (argc > 1) {
 		warn("Syntax error: unused parameters %s, ...", argv[1]);
-		return (2); // treated as syntax error
+		return (SYNTAX_ERR); // treated as syntax error
 	}
 
 	exit(get_retval());

@@ -41,7 +41,7 @@ extern int yylineno;
 		fprintf(stderr,
 			"error:%d: syntax error near unexpected token '%s'\n",
 			yylineno, yytext);
-		return (0);
+		return (1);
 	};
 %}
 %%
