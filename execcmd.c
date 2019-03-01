@@ -25,6 +25,9 @@ int exec_group(struct cmdgrp *cg) {
 	STAILQ_FOREACH(p, &cg->subcmds, entries) {
 		result = exec_pipe(p->p);
 
+		// return value of the last command
+		set_retval(result);
+
 		// pipeline terminated by a signal
 		if (result > SIG_VAL) {
 			// command group must be terminated as well
@@ -32,8 +35,6 @@ int exec_group(struct cmdgrp *cg) {
 		}
 	}
 
-	// return value of the last command
-	set_retval(result);
 	return (result);
 }
 
